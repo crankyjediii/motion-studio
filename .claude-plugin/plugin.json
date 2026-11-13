@@ -1,0 +1,13 @@
+{
+  "name": "motion-studio",
+  "version": "0.1.0",
+  "author": {
+    "name": "crankyjediii",
+    "url": "https://github.com/crankyjediii"
+  },
+  "homepage": "https://github.com/crankyjediii/motion-studio#readme",
+  "repository": "https://github.com/crankyjediii/motion-studio",
+  "description": "A motion graphics studio inside Claude Code: creative direction, motion engineering, editing and sound design for 15-60 second ads and videos, rendered locally to horizontal, vertical and square MP4.",
+  "keywords": ["motion-graphics", "video", "advertising", "animation", "product-demo"],
+  "license": "MIT"
+}

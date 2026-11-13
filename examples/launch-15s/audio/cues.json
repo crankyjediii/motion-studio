@@ -1,0 +1,12 @@
+{
+  "target": -14,
+  "music": { "file": "audio/music.wav", "gain": -4, "fadeOut": 0.8 },
+  "cues": [
+    { "file": "audio/sfx/whoosh.wav", "at": "turn-0.1", "gain": -9 },
+    { "file": "audio/sfx/swipe.wav", "at": "product-0.05", "gain": -12 },
+    { "file": "audio/sfx/click.wav", "at": "product+2.3", "gain": -6 },
+    { "file": "audio/sfx/pop.wav", "at": "product+3.1", "gain": -8 },
+    { "file": "audio/sfx/rise.wav", "at": "end-1.5", "gain": -14 },
+    { "file": "audio/sfx/chime.wav", "at": "end+0.5", "gain": -9 }
+  ]
+}

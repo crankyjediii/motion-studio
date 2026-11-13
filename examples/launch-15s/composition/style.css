@@ -1,0 +1,110 @@
+/* Reference styles. Everything is sized in --u (1% of the short edge) and recomposed per format below. */
+:root {
+  --ink: #0d0f1a; --paper: #f3efe6; --coral: #ff5b3a; --violet: #6c5cff; --mist: #c9c6bd;
+  --pad: calc(var(--u) * 9);
+}
+.scene { padding: var(--pad); display: flex; flex-direction: column; justify-content: center; }
+.paper { background: var(--paper); color: var(--ink); }
+.coral { background: var(--coral); color: var(--ink); }
+.ink { background: var(--ink); color: var(--paper); --disclose-color: var(--paper); }
+
+.display {
+  margin: 0; font-weight: 750; letter-spacing: -0.035em; line-height: 0.98;
+  font-size: calc(var(--u) * 15); text-wrap: balance;
+}
+.display.huge { font-size: calc(var(--u) * 19); }
+.display.mid { font-size: calc(var(--u) * 9.5); line-height: 1.02; }
+.display.small { font-size: calc(var(--u) * 6.5); letter-spacing: -0.02em; }
+.eyebrow, .stamp, .cta { margin: 0; font-size: calc(var(--u) * 3); font-weight: 600; letter-spacing: 0.02em; }
+.stamp { position: absolute; top: var(--pad); left: var(--pad); opacity: 0.55; font-variant-numeric: tabular-nums; }
+.eyebrow { color: var(--coral); margin-bottom: calc(var(--u) * 2); }
+
+/* Hook: the last word gets struck through once it has landed. */
+.struck { position: relative; display: inline-block; }
+.struck::after {
+  content: ""; position: absolute; left: -2%; right: -2%; top: 54%; height: 0.09em; background: var(--coral);
+  transform-origin: left; animation: strike 0.35s var(--ease-in-out) 1.35s both;
+}
+@keyframes strike { from { transform: scaleX(0); } }
+
+/* Turn */
+#turn { align-items: center; text-align: center; }
+
+/* Product */
+.product { flex-direction: row; align-items: center; gap: calc(var(--u) * 6); }
+.product .copy { flex: 0 0 36%; }
+.device-wrap { position: relative; flex: 1; }
+.browser { width: 100%; }
+.cal {
+  position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--u) * 1);
+  padding: calc(var(--u) * 2); aspect-ratio: 16 / 10; background: #fbfaf7;
+}
+.day { position: relative; border-radius: calc(var(--u) * 0.8); background: #f0eee8; }
+.day b { position: absolute; top: calc(var(--u) * 0.8); left: calc(var(--u) * 1); font-size: calc(var(--u) * 1.5); color: #7d7a72; font-weight: 600; }
+.mtg, .focus { position: absolute; left: 8%; right: 8%; top: calc(var(--y) + 9%); height: var(--h); border-radius: calc(var(--u) * 0.6); }
+.mtg { background: var(--mist); animation: a-scale 0.5s var(--ease-out) var(--d) both; }
+/* Meetings that get moved out of the focus block leave after the click. */
+.mtg.gone { animation: a-scale 0.5s var(--ease-out) var(--d) both, a-scale-out 0.35s var(--ease-in) 2.45s forwards; }
+.focus { background: var(--violet); transform-origin: top; animation: grow 0.7s var(--ease-out) 2.6s both; }
+@keyframes grow { from { transform: scaleY(0); opacity: 0; } }
+.protect {
+  position: absolute; right: calc(var(--u) * 2.4); bottom: calc(var(--u) * 2.2); padding: calc(var(--u) * 0.9) calc(var(--u) * 1.8);
+  border-radius: 999px; background: var(--ink); color: var(--paper); font-size: calc(var(--u) * 1.7); font-weight: 600;
+  animation: a-fade 0.4s linear 1.4s both, press 0.3s var(--ease-out) 2.3s both;
+}
+@keyframes press { 50% { transform: scale(0.93); } }
+.cal .cursor { left: 40%; top: 30%; animation: a-fade 0.3s linear 1.5s both, travel 0.8s var(--ease-in-out) 1.5s both; }
+@keyframes travel { to { left: 93%; top: 90%; } }
+.chip {
+  position: absolute; left: calc(var(--u) * -3); bottom: calc(var(--u) * -3); padding: calc(var(--u) * 1.4) calc(var(--u) * 2.6);
+  border-radius: 999px; background: var(--coral); color: var(--ink); font-size: calc(var(--u) * 2.8); font-weight: 700;
+  box-shadow: 0 calc(var(--u) * 1.5) calc(var(--u) * 4) rgb(0 0 0 / 0.35);
+}
+
+/* Proof */
+.proof { align-items: center; text-align: center; gap: calc(var(--u) * 1); }
+.stat { display: flex; align-items: baseline; gap: calc(var(--u) * 1.5); line-height: 0.85; }
+.num { font-size: calc(var(--u) * 42); font-weight: 800; letter-spacing: -0.06em; color: var(--coral); font-variant-numeric: tabular-nums; }
+.unit { font-size: calc(var(--u) * 10); font-weight: 750; letter-spacing: -0.03em; }
+
+/* End card */
+.end { align-items: center; text-align: center; gap: calc(var(--u) * 5); --x: 50%; --y: 50%; }
+.lockup { display: flex; align-items: center; gap: calc(var(--u) * 3); }
+.mark {
+  width: calc(var(--u) * 12); aspect-ratio: 1; border-radius: 28%; background: var(--coral);
+  box-shadow: inset calc(var(--u) * -3.2) calc(var(--u) * -3.2) 0 var(--violet);
+}
+.cta { opacity: 0.8; }
+
+/* ---------- Vertical: stack, bigger type, device fills the width, action in the middle band ---------- */
+html[data-format="vertical"] { --pad: calc(var(--u) * 8); }
+html[data-format="vertical"] .display { font-size: calc(var(--u) * 19); }
+html[data-format="vertical"] .display.huge { font-size: calc(var(--u) * 27); }
+html[data-format="vertical"] .display.mid { font-size: calc(var(--u) * 12.5); }
+html[data-format="vertical"] .display.small { font-size: calc(var(--u) * 8.5); }
+html[data-format="vertical"] .eyebrow, html[data-format="vertical"] .stamp, html[data-format="vertical"] .cta { font-size: calc(var(--u) * 4); }
+html[data-format="vertical"] .stamp { top: calc(var(--h) * 0.12); }
+html[data-format="vertical"] .product { flex-direction: column; justify-content: center; align-items: stretch; gap: calc(var(--u) * 9); }
+html[data-format="vertical"] .product .copy { flex: none; }
+html[data-format="vertical"] .device-wrap { flex: none; }
+html[data-format="vertical"] .cal { aspect-ratio: 4 / 3.4; }
+html[data-format="vertical"] .day b { font-size: calc(var(--u) * 2.2); }
+html[data-format="vertical"] .protect { font-size: calc(var(--u) * 2.6); }
+html[data-format="vertical"] .chip { left: 50%; translate: -50% 0; bottom: calc(var(--u) * -5); font-size: calc(var(--u) * 3.8); white-space: nowrap; }
+html[data-format="vertical"] .num { font-size: calc(var(--u) * 56); }
+html[data-format="vertical"] .unit { font-size: calc(var(--u) * 13); }
+html[data-format="vertical"] .lockup { flex-direction: column; }
+html[data-format="vertical"] .mark { width: calc(var(--u) * 20); }
+
+/* ---------- Square: stacked like vertical, tighter ---------- */
+html[data-format="square"] { --pad: calc(var(--u) * 7); }
+html[data-format="square"] .display { font-size: calc(var(--u) * 16); }
+html[data-format="square"] .display.huge { font-size: calc(var(--u) * 14); }
+html[data-format="square"] .display.mid { font-size: calc(var(--u) * 8.5); }
+html[data-format="square"] .display.small { font-size: calc(var(--u) * 6.5); }
+html[data-format="square"] .product { flex-direction: column; align-items: stretch; gap: calc(var(--u) * 4); }
+html[data-format="square"] .product .copy { flex: none; }
+html[data-format="square"] .device-wrap { flex: none; width: 82%; margin-inline: auto; }
+html[data-format="square"] .cal { aspect-ratio: 16 / 8.6; }
+html[data-format="square"] .chip { left: auto; right: calc(var(--u) * -6); bottom: calc(var(--u) * -2.5); }
+html[data-format="square"] .num { font-size: calc(var(--u) * 40); }

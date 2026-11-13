@@ -1,0 +1,19 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+
+# Local credentials and Claude settings
+.env
+.env.*
+!.env.example
+/.claude/
+
+# Project data and generated output belong outside the plugin checkout
+/.motion-studio/
+/.ms-home/
+/projects/
+/build/
+/renders/
+/deliverables/
+node_modules/

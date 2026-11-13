@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Nimbra launch, 15s (reference composition)</title>
+  <link rel="stylesheet" href="../__studio/studio.css">
+  <link rel="stylesheet" href="brand.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../__studio/stage.js"></script>
+</head>
+<body>
+  <!--
+    Reference piece for a fictional product. Shows the conventions:
+    scenes with data-dur / data-overlap, kit classes with --d delays, a JS-driven counter,
+    an illustrative interface scene with provenance + disclosure, and per-format layout in style.css.
+  -->
+  <main id="stage">
+
+    <!-- 1. Hook: name the pain in the first second. -->
+    <section class="scene paper" id="hook" data-dur="2.8" data-label="Hook">
+      <p class="stamp a a-fade" style="--d:.1s">Monday, 9:00</p>
+      <h1 class="display">
+        <span class="mask"><span class="a a-mask-up" style="--d:.15s">Meetings</span></span>
+        <span class="mask"><span class="a a-mask-up" style="--d:.3s">eat your</span></span>
+        <span class="mask"><span class="a a-mask-up struck" style="--d:.45s">week.</span></span>
+      </h1>
+    </section>
+
+    <!-- 2. Turn: one hard cut of colour, three words. -->
+    <section class="scene coral t-wipe-up" id="turn" data-dur="2.4" data-overlap="0.5" data-label="Turn" style="--t:.5s">
+      <h2 class="display huge split" data-split="chars" style="--in:a-rise; --d:.35s; --stagger:.03s">Take it back.</h2>
+    </section>
+
+    <!-- 3. Product: stylised interface, declared illustrative and labelled on picture. -->
+    <section class="scene ink t-wipe-left product" id="product" data-dur="5" data-overlap="0.5" data-label="Product"
+             data-provenance="illustrative" data-disclose="Illustrative interface" style="--t:.5s">
+      <div class="copy">
+        <p class="eyebrow a a-fade" style="--d:.5s">Nimbra</p>
+        <h2 class="display mid split" data-split="words" style="--d:.6s; --stagger:.08s">Your calendar, defended.</h2>
+      </div>
+      <div class="space device-wrap">
+        <div class="browser a a-tilt" data-ui style="--d:.45s; --t:1.1s">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div class="cal">
+            <div class="day"><b>Mon</b><span class="mtg" style="--y:8%; --h:14%; --d:.9s"></span><span class="mtg" style="--y:52%; --h:12%; --d:1.0s"></span></div>
+            <div class="day"><b>Tue</b><span class="mtg" style="--y:20%; --h:18%; --d:1.05s"></span><span class="mtg gone" style="--y:60%; --h:14%; --d:1.1s"></span></div>
+            <div class="day"><b>Wed</b><span class="mtg gone" style="--y:10%; --h:12%; --d:1.15s"></span><span class="focus" style="--y:30%; --h:52%"></span></div>
+            <div class="day"><b>Thu</b><span class="mtg" style="--y:12%; --h:16%; --d:1.2s"></span><span class="mtg gone" style="--y:48%; --h:20%; --d:1.25s"></span></div>
+            <div class="day"><b>Fri</b><span class="mtg" style="--y:36%; --h:12%; --d:1.3s"></span></div>
+            <div class="protect">Protect focus</div>
+            <div class="cursor"></div>
+          </div>
+        </div>
+        <div class="chip a a-pop" style="--d:3.1s; --t:.6s">Focus time protected</div>
+      </div>
+    </section>
+
+    <!-- 4. Proof: one number, counted by the frame clock. -->
+    <section class="scene paper t-push proof" id="proof" data-dur="2.9" data-overlap="0.5" data-label="Proof" style="--t:.5s">
+      <div class="stat a a-rise" style="--d:.45s">
+        <span class="num" id="hours">0</span><span class="unit">hrs</span>
+      </div>
+      <p class="display small a a-rise" style="--d:.7s">back, every week.</p>
+    </section>
+
+    <!-- 5. End card: logo resolves last and holds. -->
+    <section class="scene ink t-iris end" id="end" data-dur="4" data-overlap="0.6" data-label="End card" style="--t:.6s">
+      <div class="lockup drift" style="--t:4s; --to:1.06">
+        <div class="mark a a-pop" style="--d:.45s; --t:.7s"></div>
+        <p class="display mid a a-rise" style="--d:.65s">Nimbra</p>
+      </div>
+      <p class="cta a a-fade" style="--d:1.2s">Start free at nimbra.example</p>
+    </section>
+
+  </main>
+  <script>
+    // Deterministic counter: derived from scene time, never from a timer.
+    const hours = document.getElementById('hours');
+    Studio.scene('proof', (t) => {
+      hours.textContent = Math.round(6 * Studio.ease.outExpo(Studio.range(t, 0.45, 1.5)));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+/*
+ * Motion Studio base + motion kit.
+ * Everything here is driven by CSS animations so the runtime can seek it.
+ * Do not use CSS transitions, setTimeout or requestAnimationFrame for motion: they are not seekable.
+ */
+
+/* ---------- Stage ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+html[data-solo], html[data-solo] body { background: transparent; }
+#stage {
+  position: relative; width: var(--w); height: var(--h); overflow: hidden;
+  background: var(--brand-background, #0b0b0f); color: var(--brand-foreground, #f5f5f7);
+  font-family: var(--brand-font-body, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  font-size: calc(var(--u) * 3);
+  -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
+}
+html[data-solo]:not([data-solo="__under"]) #stage { background: transparent !important; }
+.scene { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+.scene.on { visibility: visible; }
+.layer { position: absolute; inset: 0; pointer-events: none; }
+
+/* Format switches: author real layout changes per format, never a crop of the horizontal master. */
+html:not([data-format="horizontal"]) .only-horizontal,
+html:not([data-format="vertical"]) .only-vertical,
+html:not([data-format="square"]) .only-square,
+html[data-format="horizontal"] .not-horizontal,
+html[data-format="vertical"] .not-vertical,
+html[data-format="square"] .not-square { display: none !important; }
+
+/* ---------- Tokens ---------- */
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);          /* expo out: confident arrivals */
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);           /* exits */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);      /* camera moves */
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.1, 1);        /* social, punchy */
+  --ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%, 1.017 19.4%, 1.077 22.4%, 1.121 26.2%, 1.13 28.4%, 1.123 31%, 1.019 43.6%, 0.99 50.7%, 0.997 62.8%, 1);
+  --ease: var(--brand-ease, var(--ease-out));
+  --dur-scale: var(--brand-dur-scale, 1);
+  --stagger: 0.045s;
+}
+
+/* ---------- Motion kit ----------
+ * Usage: class="a a-rise" style="--d:.4s; --t:.8s"
+ *   --d  delay from scene start      --t  duration      --i  stagger index (set by data-split, or by hand)
+ * Add an exit on the same element with --out / --out-at:  style="--out:a-fade-out; --out-at:2.6s"
+ */
+.a {
+  animation:
+    var(--in, a-fade) calc(var(--t, 0.7s) * var(--dur-scale)) var(--ease) calc(var(--d, 0s) + var(--i, 0) * var(--stagger)) both,
+    var(--out, a-none) calc(var(--t-out, 0.35s) * var(--dur-scale)) var(--ease-in) var(--out-at, 9999s) forwards;
+}
+.a-fade { --in: a-fade; }
+.a-rise { --in: a-rise; }
+.a-drop { --in: a-drop; }
+.a-left { --in: a-left; }
+.a-right { --in: a-right; }
+.a-scale { --in: a-scale; }
+.a-pop { --in: a-scale; --ease: var(--ease-spring); }
+.a-blur { --in: a-blur; }
+.a-mask-up { --in: a-mask-up; }
+.a-mask-right { --in: a-mask-right; }
+.a-wipe { --in: a-wipe; }
+.a-tilt { --in: a-tilt; }
+.a-draw { --in: a-draw; stroke-dasharray: 1; stroke-dashoffset: 1; } /* SVG paths: set pathLength="1" */
+
+/* Staggered children of data-split text: class="split a-rise" on the parent. */
+.split .wd { display: inline-block; white-space: nowrap; }
+.split .ch { display: inline-block; }
+.split[data-split="words"] .wd, .split[data-split="chars"] .ch {
+  animation: var(--in, a-rise) calc(var(--t, 0.7s) * var(--dur-scale)) var(--ease) calc(var(--d, 0s) + var(--i, 0) * var(--stagger)) both;
+}
+/* Line mask for editorial reveals: wrap a line in .mask so children rise from behind an edge. */
+.mask { display: block; overflow: hidden; padding-block: 0.08em; margin-block: -0.08em; }
+.mask > * { display: block; }
+/* Transforms and clip-paths do nothing on inline boxes. */
+span.a, a.a, em.a, strong.a, b.a, i.a { display: inline-block; }
+
+@keyframes a-none { }
+@keyframes a-fade { from { opacity: 0; } }
+@keyframes a-rise { from { opacity: 0; transform: translateY(0.6em); } }
+@keyframes a-drop { from { opacity: 0; transform: translateY(-0.6em); } }
+@keyframes a-left { from { opacity: 0; transform: translateX(calc(var(--u) * 6)); } }
+@keyframes a-right { from { opacity: 0; transform: translateX(calc(var(--u) * -6)); } }
+@keyframes a-scale { from { opacity: 0; transform: scale(0.86); } }
+@keyframes a-blur { from { opacity: 0; filter: blur(calc(var(--u) * 1.6)); transform: scale(1.04); } }
+@keyframes a-mask-up { from { transform: translateY(110%); } }
+@keyframes a-mask-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes a-wipe { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes a-tilt { from { opacity: 0; transform: perspective(calc(var(--u) * 120)) rotateX(22deg) translateY(calc(var(--u) * 8)) scale(0.92); } }
+@keyframes a-draw { to { stroke-dashoffset: 0; } }
+@keyframes a-fade-out { to { opacity: 0; } }
+@keyframes a-rise-out { to { opacity: 0; transform: translateY(-0.5em); } }
+@keyframes a-scale-out { to { opacity: 0; transform: scale(1.08); } }
+@keyframes a-blur-out { to { opacity: 0; filter: blur(calc(var(--u) * 1.6)); } }
+
+/* Scene transitions: put on the incoming .scene with data-overlap matching --t. */
+.scene.t-fade { animation: a-fade var(--t, 0.4s) linear both; }
+.scene.t-wipe-up { animation: t-wipe-up var(--t, 0.6s) var(--ease-in-out) both; }
+.scene.t-wipe-left { animation: t-wipe-left var(--t, 0.6s) var(--ease-in-out) both; }
+.scene.t-iris { animation: t-iris var(--t, 0.7s) var(--ease-in-out) both; }
+.scene.t-push { animation: t-push var(--t, 0.6s) var(--ease-in-out) both; }
+@keyframes t-wipe-up { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes t-wipe-left { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0); } }
+@keyframes t-iris { from { clip-path: circle(0% at var(--x, 50%) var(--y, 50%)); } to { clip-path: circle(150% at var(--x, 50%) var(--y, 50%)); } }
+@keyframes t-push { from { transform: translateY(100%); } }
+
+/* Slow continuous moves that keep a hold alive. */
+.drift { animation: drift var(--t, 8s) linear both; }
+@keyframes drift { from { transform: scale(1); } to { transform: scale(var(--to, 1.06)); } }
+
+/* ---------- Dimensional helpers ---------- */
+.space { perspective: calc(var(--u) * 140); perspective-origin: 50% 45%; transform-style: preserve-3d; }
+.plane { transform-style: preserve-3d; backface-visibility: hidden; }
+.shadow-soft { box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 8) rgb(0 0 0 / 0.28), 0 calc(var(--u) * 0.6) calc(var(--u) * 1.6) rgb(0 0 0 / 0.2); }
+
+/* ---------- Interface scenes ---------- */
+/* [data-ui] marks an interface representation. Its scene must declare data-provenance. */
+.browser {
+  border-radius: calc(var(--u) * 1.4); overflow: hidden; background: #fff; color: #111;
+  box-shadow: 0 calc(var(--u) * 4) calc(var(--u) * 12) rgb(0 0 0 / 0.35);
+}
+.browser > .bar {
+  height: calc(var(--u) * 4); display: flex; align-items: center; gap: calc(var(--u) * 0.8);
+  padding-inline: calc(var(--u) * 1.6); background: #ececef;
+}
+.browser > .bar i { width: calc(var(--u) * 1.1); aspect-ratio: 1; border-radius: 50%; background: #c9c9cf; }
+.browser > img, .browser > video, .phone > img, .phone > video { display: block; width: 100%; height: auto; }
+.phone {
+  border-radius: calc(var(--u) * 6); overflow: hidden; background: #000;
+  border: calc(var(--u) * 1) solid #1c1c20;
+  box-shadow: 0 calc(var(--u) * 4) calc(var(--u) * 12) rgb(0 0 0 / 0.4);
+}
+.cursor {
+  position: absolute; width: calc(var(--u) * 2.6); aspect-ratio: 1; z-index: 5;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 9.5-6.7 1.4L16 20l-3 1.4-3.6-7.2L4 18z' fill='%23111' stroke='%23fff' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
+}
+/* On-picture disclosure for illustrative interface scenes: add data-disclose to the scene. */
+.scene[data-provenance="illustrative"][data-disclose]::after {
+  content: attr(data-disclose);
+  position: absolute; left: 50%; bottom: calc(var(--h) * 0.035); transform: translateX(-50%);
+  font-size: calc(var(--u) * 1.8); letter-spacing: 0.04em; opacity: 0.6; white-space: nowrap;
+  color: var(--disclose-color, currentColor);
+}
+html[data-format="vertical"] .scene[data-provenance="illustrative"][data-disclose]::after { bottom: calc(var(--h) * 0.15); font-size: calc(var(--u) * 2); }
+html[data-disclosure="report-only"] .scene[data-disclose]::after { display: none; }

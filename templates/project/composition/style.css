@@ -1,0 +1,17 @@
+/* Project styles. Size with --u (1% of the short edge) so layouts hold across formats. */
+.scene { display: grid; place-items: center; padding: calc(var(--u) * 8); text-align: center; }
+#end { background: var(--brand-primary, #4f46e5); }
+
+.headline {
+  margin: 0;
+  font-family: var(--brand-font-display, inherit);
+  font-weight: var(--brand-weight-display, 650);
+  font-size: calc(var(--u) * 9);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Compose each format for its frame. */
+html[data-format="vertical"] .headline { font-size: calc(var(--u) * 12); }
+html[data-format="square"] .headline { font-size: calc(var(--u) * 10); }

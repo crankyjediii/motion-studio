@@ -1,0 +1,12 @@
+{
+  "name": "motion-studio",
+  "description": "Local motion graphics production for short ads and software demos.",
+  "owner": { "name": "crankyjediii" },
+  "plugins": [
+    {
+      "name": "motion-studio",
+      "source": "./",
+      "description": "Motion graphics studio for 15-60 second ads and videos, rendered locally."
+    }
+  ]
+}

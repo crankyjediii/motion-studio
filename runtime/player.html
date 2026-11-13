@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Studio preview</title>
+<style>
+  :root {
+    --bg: #101013; --panel: #18181c; --line: #2a2a31; --text: #ececf1; --muted: #9a9aa6;
+    --accent: #7c9cff; --ok: #5fd39a; --warn: #f0b860; --bad: #ff7a7a;
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+  body { display: grid; grid-template: auto 1fr auto / 1fr minmax(280px, 340px); }
+  button, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 12px; }
+  button:hover { border-color: #44444f; }
+  button:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #0b0d18; }
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  header { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  header .sub { color: var(--muted); }
+  .seg { display: flex; gap: 4px; }
+  .spacer { flex: 1; }
+
+  #viewport { position: relative; overflow: hidden; min-height: 0; background: #08080a; }
+  #frame { position: absolute; left: 50%; top: 50%; transform-origin: 0 0; background: #000; box-shadow: 0 10px 40px rgb(0 0 0 / 0.5); }
+  #frame iframe, #frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #sceneinfo { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px; align-items: center; background: rgb(16 16 19 / 0.82); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; font-size: 12px; }
+  .chip { border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+  .chip.authentic { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .chip.illustrative { background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); }
+  .chip.generated, .chip.unspecified { background: #2a2a31; color: var(--muted); }
+
+  aside { border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: var(--panel); }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0; padding: 12px 14px 6px; }
+  #notes { flex: 1; overflow: auto; padding: 0 8px; margin: 0; list-style: none; }
+  #notes li { padding: 8px; border-radius: 8px; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 8px; align-items: start; }
+  #notes li:hover { background: #1f1f25; }
+  #notes li.resolved { opacity: 0.45; }
+  #notes .tc { font-variant-numeric: tabular-nums; color: var(--accent); background: none; border: 0; padding: 0; }
+  #notes .meta { grid-column: 2; color: var(--muted); font-size: 12px; }
+  #notes p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  #notes .done { padding: 2px 8px; font-size: 12px; }
+  #empty { color: var(--muted); padding: 8px 14px; }
+  form { padding: 10px 14px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+  textarea { width: 100%; min-height: 72px; resize: vertical; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .decide { display: flex; gap: 8px; padding: 0 14px 12px; }
+  .decide button { flex: 1; }
+  #approve { border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); }
+  #status { padding: 0 14px 12px; color: var(--muted); font-size: 12px; min-height: 1.5em; }
+
+  footer { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-top: 1px solid var(--line); }
+  #time { font-variant-numeric: tabular-nums; min-width: 132px; }
+  #track { position: relative; flex: 1; height: 34px; border-radius: 6px; background: #1b1b20; cursor: pointer; touch-action: none; }
+  #track .scene { position: absolute; top: 0; bottom: 0; border-left: 1px solid #3a3a44; font-size: 11px; color: var(--muted); padding: 2px 5px; overflow: hidden; white-space: nowrap; pointer-events: none; }
+  #track .scene:nth-child(even) { background: rgb(255 255 255 / 0.03); }
+  #track .pin { position: absolute; bottom: 0; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--warn); pointer-events: none; }
+  #track .pin.resolved { background: #555; }
+  #head { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--accent); pointer-events: none; }
+  @media (max-width: 760px) { body { grid-template: auto 1fr auto auto / 1fr; } aside { border-left: 0; border-top: 1px solid var(--line); max-height: 40vh; } }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="name">Motion Studio</h1>
+  <span class="sub" id="meta"></span>
+  <span class="spacer"></span>
+  <div class="seg" id="formats" role="group" aria-label="Format"></div>
+  <div class="seg" id="sources" role="group" aria-label="Source">
+    <button data-source="live" title="Live composition, updates as files change">Live</button>
+    <button data-source="draft" title="Draft render">Draft</button>
+    <button data-source="final" title="Final render">Final</button>
+  </div>
+</header>
+
+<div id="viewport">
+  <div id="frame">
+    <iframe id="live" title="Composition"></iframe>
+    <video id="video" playsinline hidden></video>
+  </div>
+  <div id="sceneinfo"><span id="scenelabel">—</span><span class="chip unspecified" id="prov"></span></div>
+</div>
+
+<aside>
+  <h2>Notes</h2>
+  <ul id="notes"></ul>
+  <div id="empty">No notes yet. Pause on a frame and write what should change.</div>
+  <form id="noteform">
+    <textarea id="notetext" aria-label="Note" placeholder="e.g. Hold the logo half a second longer"></textarea>
+    <button type="submit" id="add">Add note at 00:00.00</button>
+  </form>
+  <div class="decide">
+    <button id="approve">Approve</button>
+    <button id="changes">Request changes</button>
+  </div>
+  <div id="status" role="status"></div>
+</aside>
+
+<footer>
+  <button id="play" aria-label="Play">Play</button>
+  <span id="time">00:00.00 / 00:00.00</span>
+  <div id="track" tabindex="0" role="slider" aria-label="Timeline" aria-valuemin="0"><div id="head"></div></div>
+</footer>
+<audio id="mix" preload="auto"></audio>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const live = $('#live'), video = $('#video'), mix = $('#mix'), track = $('#track');
+let state, studio = null, format, source = 'live', t = 0, playing = false, duration = 0, fps = 30, scenes = [], clock0 = 0, version = null;
+
+const tc = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(2).padStart(5, '0')}`;
+const api = async (path, body) => {
+  const response = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined);
+  const result = await response.json();
+  if (!response.ok) { $('#status').textContent = result.error || 'Request failed.'; throw new Error(result.error || 'Request failed.'); }
+  return result;
+};
+
+async function refresh(first) {
+  state = await api('/api/state');
+  if (first) {
+    format = state.project.formats[0];
+    $('#name').textContent = state.project.name;
+    document.title = state.project.name + ' · preview';
+    $('#formats').replaceChildren(...state.project.formats.map((f) => {
+      const b = document.createElement('button');
+      b.textContent = f[0].toUpperCase() + f.slice(1);
+      b.dataset.format = f;
+      b.onclick = () => { format = f; loadSource(); };
+      return b;
+    }));
+  }
+  const stage = state.project.approved?.final ? 'Final approved' : state.project.changesRequested ? 'Changes requested' : 'Awaiting review';
+  $('#meta').textContent = `${state.project.client || 'No brand'} · ${stage}`;
+  for (const b of document.querySelectorAll('#sources button')) {
+    if (b.dataset.source !== 'live') b.disabled = !state.renders[b.dataset.source]?.[format];
+  }
+  drawNotes();
+  if (first || state.version !== version) { version = state.version; loadSource(); }
+}
+
+function fit() {
+  const { w, h } = state.formats[format];
+  const vp = $('#viewport').getBoundingClientRect();
+  const k = Math.min((vp.width - 32) / w, (vp.height - 32) / h);
+  Object.assign($('#frame').style, { width: w + 'px', height: h + 'px', transform: `scale(${k}) translate(-50%, -50%)` });
+}
+
+function loadSource() {
+  pause();
+  if (source !== 'live' && !state.renders[source]?.[format]) source = 'live';
+  for (const b of document.querySelectorAll('#formats button')) b.setAttribute('aria-pressed', b.dataset.format === format);
+  for (const b of document.querySelectorAll('#sources button')) {
+    b.setAttribute('aria-pressed', b.dataset.source === source);
+    if (b.dataset.source !== 'live') b.disabled = !state.renders[b.dataset.source]?.[format];
+  }
+  fit();
+  live.hidden = source !== 'live';
+  video.hidden = source === 'live';
+  if (source === 'live') {
+    studio = null;
+    live.onload = async () => {
+      const s = live.contentWindow.__studio;
+      if (!s) { $('#status').textContent = 'composition/index.html does not load the stage runtime.'; return; }
+      await s.ready;
+      studio = s; duration = s.duration; fps = s.fps; scenes = s.scenes;
+      drawTrack(); setTime(Math.min(t, duration));
+    };
+    live.src = `/composition/index.html?format=${format}&disclosure=${state.project.disclosure === 'report-only' ? 'report-only' : 'label'}&v=${state.version}`;
+    if (state.hasMix) mix.src = `/build/mix.wav?v=${state.version}`; else mix.removeAttribute('src');
+  } else {
+    video.onloadedmetadata = () => { duration = video.duration; drawTrack(); setTime(Math.min(t, duration)); };
+    video.src = `/renders/${source}/${format}.mp4?v=${state.renders[source][format]}`;
+  }
+}
+
+function setTime(v) {
+  t = Math.max(0, Math.min(duration, v));
+  if (source === 'live') { studio?.seek(t); if (state.hasMix && mix.readyState) mix.currentTime = t; }
+  else video.currentTime = t;
+  draw();
+}
+
+function play() {
+  if (!duration) return;
+  if (t >= duration - 1 / fps) setTime(0);
+  playing = true;
+  if (source === 'live') { clock0 = performance.now() - t * 1000; if (state.hasMix) mix.play().catch(() => {}); }
+  else video.play();
+  $('#play').textContent = 'Pause';
+}
+function pause() {
+  playing = false;
+  mix.pause(); video.pause();
+  studio?.seek(t, { playing: false });
+  $('#play').textContent = 'Play';
+}
+
+function tick() {
+  if (playing) {
+    if (source === 'live') {
+      t = state.hasMix && !mix.paused ? mix.currentTime : (performance.now() - clock0) / 1000;
+      if (t >= duration) { t = duration; pause(); }
+      studio?.seek(t, { playing });
+    } else { t = video.currentTime; if (video.ended) pause(); }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+
+function draw() {
+  $('#time').textContent = `${tc(t)} / ${tc(duration)}`;
+  $('#add').textContent = `Add note at ${tc(t)}`;
+  $('#head').style.left = (duration ? (t / duration) * 100 : 0) + '%';
+  track.setAttribute('aria-valuemax', duration.toFixed(2));
+  track.setAttribute('aria-valuenow', t.toFixed(2));
+  const s = sceneAt(t);
+  $('#scenelabel').textContent = s ? s.label : '—';
+  const p = $('#prov');
+  p.className = 'chip ' + (s ? s.provenance : 'unspecified');
+  p.textContent = s ? ({ authentic: 'Authentic footage', illustrative: 'Illustrative', generated: 'Generated', unspecified: 'Motion design' })[s.provenance] || s.provenance : '';
+}
+const sceneAt = (time) => [...scenes].reverse().find((s) => time >= s.start && time < s.end) || scenes.at(-1);
+
+function drawTrack() {
+  track.querySelectorAll('.scene, .pin').forEach((n) => n.remove());
+  for (const s of scenes) {
+    const d = document.createElement('div');
+    d.className = 'scene';
+    d.style.left = (s.start / duration) * 100 + '%';
+    d.style.width = (s.dur / duration) * 100 + '%';
+    d.textContent = s.label;
+    track.append(d);
+  }
+  for (const n of state.feedback) {
+    const p = document.createElement('div');
+    p.className = 'pin' + (n.status === 'resolved' ? ' resolved' : '');
+    p.style.left = (n.t / duration) * 100 + '%';
+    track.append(p);
+  }
+}
+
+function drawNotes() {
+  const list = [...state.feedback].sort((a, b) => a.t - b.t);
+  $('#empty').hidden = list.length > 0;
+  $('#notes').replaceChildren(...list.map((n) => {
+    const li = document.createElement('li');
+    if (n.status === 'resolved') li.className = 'resolved';
+    const time = document.createElement('button');
+    time.className = 'tc'; time.textContent = tc(n.t); time.title = 'Jump to this frame';
+    time.onclick = () => { pause(); setTime(n.t); };
+    const text = document.createElement('p'); text.textContent = n.text;
+    const done = document.createElement('button');
+    done.className = 'done'; done.textContent = n.status === 'resolved' ? 'Reopen' : 'Resolve';
+    done.onclick = async () => { await api('/api/feedback/status', { id: n.id, status: n.status === 'resolved' ? 'open' : 'resolved' }); refresh(); };
+    const meta = document.createElement('div');
+    meta.className = 'meta'; meta.textContent = [n.format, n.scene, n.status === 'resolved' ? 'resolved' : ''].filter(Boolean).join(' · ');
+    li.append(time, text, done, meta);
+    return li;
+  }));
+  if (duration) drawTrack();
+}
+
+$('#noteform').onsubmit = async (e) => {
+  e.preventDefault();
+  const text = $('#notetext').value.trim();
+  if (!text) return;
+  await api('/api/feedback', { t: +t.toFixed(3), format, scene: sceneAt(t)?.id, source, text });
+  $('#notetext').value = '';
+  $('#status').textContent = 'Saved. Tell Claude "notes are in" to apply them.';
+  refresh();
+};
+$('#notetext').onkeydown = (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) $('#noteform').requestSubmit(); };
+$('#approve').onclick = async () => { await api('/api/decision', { approved: true }); $('#status').textContent = 'Approved. Tell Claude to deliver.'; refresh(); };
+$('#changes').onclick = async () => { await api('/api/decision', { approved: false }); $('#status').textContent = 'Changes requested. Tell Claude "notes are in".'; refresh(); };
+$('#play').onclick = () => (playing ? pause() : play());
+for (const b of document.querySelectorAll('#sources button')) b.onclick = () => { source = b.dataset.source; loadSource(); };
+
+const scrub = (e) => { const r = track.getBoundingClientRect(); pause(); setTime(((e.clientX - r.left) / r.width) * duration); };
+track.onpointerdown = (e) => { track.setPointerCapture(e.pointerId); scrub(e); track.onpointermove = scrub; };
+track.onpointerup = () => (track.onpointermove = null);
+addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space' && e.target.tagName === 'BUTTON') return;
+  if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+  else if (e.code === 'ArrowRight') { e.preventDefault(); pause(); setTime(t + (e.shiftKey ? 1 : 1 / fps)); }
+  else if (e.code === 'ArrowLeft') { e.preventDefault(); pause(); setTime(t - (e.shiftKey ? 1 : 1 / fps)); }
+  else if (e.key === 'n') { e.preventDefault(); pause(); $('#notetext').focus(); }
+});
+addEventListener('resize', () => state && fit());
+
+refresh(true).then(() => { tick(); setInterval(() => refresh().catch(() => {}), 2000); });
+</script>
+</body>
+</html>
