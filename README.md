@@ -1,115 +1,163 @@
-# Motion Studio
+<h1 align="center">
+  <img src="docs/assets/motion-studio-banner.svg" alt="Motion Studio, a motion graphics plugin for Claude Code" width="1200">
+</h1>
 
-Motion Studio is a Claude Code plugin for making short product ads and software demo videos from a text brief and supplied assets. It covers concept, storyboard, animation, sound, review and delivery. The renderer runs locally with Node, an installed Chromium browser and ffmpeg. There are no npm dependencies.
+<p align="center">
+  A Claude Code plugin for 15–60 second product ads and software demos.<br>
+  From your brief to animation, generated sound and local rendering.
+</p>
 
-## Install in Claude Code
+<p align="center">
+  <code>Node&nbsp;22+</code> &nbsp; <code>Local&nbsp;rendering</code> &nbsp; <code>Zero&nbsp;npm&nbsp;dependencies</code> &nbsp; <a href="LICENSE">MIT&nbsp;licensed</a>
+</p>
 
-In a Claude Code session, run:
+<p align="center">
+  <a href="#install">Install</a> &nbsp; · &nbsp;
+  <a href="#try-it">Try it</a> &nbsp; · &nbsp;
+  <a href="#the-workflow">The workflow</a> &nbsp; · &nbsp;
+  <a href="#reference">Reference</a> &nbsp; · &nbsp;
+  <a href="#support-and-status">Support &amp; status</a>
+</p>
+
+## Install
+
+Run these in **Claude Code**:
 
 ```text
 /plugin marketplace add crankyjediii/motion-studio
 /plugin install motion-studio@motion-studio
 ```
 
-Restart Claude Code after installation, then run:
+Restart Claude Code, then check your machine:
 
 ```text
 /motion-studio:setup
 ```
 
-This installs the plugin for your user account. The setup skill checks the rendering tools and asks before installing anything missing. The plugin does not need an npm install or a separate API key; use your existing Claude Code account.
+The setup skill reports missing tools and asks before installing them. Use your existing Claude Code account; the plugin needs no separate API key or npm install.
 
-### Rendering requirements
+**You’ll need:**
 
-- Claude Code with plugin support, signed in to your account.
-- Node 22 or newer, with its built-in `WebSocket`.
-- Chrome, Edge or Chromium. Set `CHROME_PATH` for a nonstandard executable location.
-- `ffmpeg` and `ffprobe` on `PATH`, with `libx264`. Editable timeline export also needs `prores_ks`.
+- **Claude Code**, signed in, with plugin support.
+- **Node 22+** for the built-in WebSocket API.
+- **Chrome, Edge or Chromium** for frame capture.
+- **ffmpeg + ffprobe** on `PATH`, with `libx264`. Editable timeline export also needs `prores_ks`.
 
-If you already use Homebrew on macOS, the required tools can be installed with:
+<details>
+<summary><strong>Install rendering tools on macOS</strong></summary>
+
+If you already use Homebrew:
 
 ```sh
 brew install node ffmpeg
 brew install --cask google-chrome
 ```
 
-Otherwise use the platform downloads for [Node](https://nodejs.org/), [Chrome](https://www.google.com/chrome/) and [ffmpeg](https://ffmpeg.org/download.html), or let `/motion-studio:setup` report the commands for your platform. `ffmpeg` and `ffprobe` must both be available in the terminal that starts Claude Code.
+Otherwise use the platform downloads for [Node](https://nodejs.org/), [Chrome](https://www.google.com/chrome/) and [ffmpeg](https://ffmpeg.org/download.html). `/motion-studio:setup` can report the commands for your platform. Start Claude Code from a terminal where `ffmpeg` and `ffprobe` are available.
 
-### Load a checkout for one session
+</details>
 
-This is useful for trying the source or developing the plugin:
+## Try it
 
-```sh
-git clone https://github.com/crankyjediii/motion-studio.git
-cd motion-studio
-claude --plugin-dir .
-```
+<p align="center">
+  <img src="docs/assets/still-preview.gif" alt="Sample ad for the fictional focus app Still: a crowded desk gives way to a calendar focus block, muted notifications and a closing wordmark" width="800">
+</p>
 
-To persistently install a local checkout, use its absolute path instead of the GitHub source:
+<p align="center"><sub>Sample output rendered locally with Motion Studio. Still is fictional; its interface is illustrative. This GIF is silent. MP4 exports include the soundtrack.</sub></p>
 
-```text
-/plugin marketplace add /absolute/path/to/motion-studio
-/plugin install motion-studio@motion-studio
-```
-
-The plugin includes four skills and five specialist agents. If the skills do not appear, check `/plugin` to confirm Motion Studio is enabled and restart Claude Code. Validate a checkout from its root with `claude plugin validate .`.
-
-## Making a video
-
-Start Claude Code in a writable folder where you want the production project saved. Give the studio your product, audience, supported features, call to action, duration and paths to any assets. For example:
+Start Claude Code in the folder where you want your production saved. A brief can be this specific:
 
 ```text
-/motion-studio:studio Make a 15-second ad for Still, a fictional focus app for freelance designers. It lets users reserve a 25-minute focus block on a daily calendar and mutes notifications during that block. The message is “Make room to focus.” End with still.example, a fictional demo URL. Use a warm paper-and-ink look, illustrative UI, system fonts and generated audio. Make horizontal, vertical and square versions. Check with me at the concept and storyboard.
+/motion-studio:studio Make a 15-second ad for Still, a fictional focus app.
+
+Audience: freelance designers.
+Features: reserve a 25-minute calendar block; mute notifications during it.
+Look: warm paper and ink, illustrative UI, system fonts.
+Sound: generated music and effects.
+Message: "Make room to focus."
+End card: still.example (a fictional demo URL).
+Formats: horizontal, vertical, square.
+Review: concept, storyboard and final preview.
 ```
 
-For your own product, replace those facts and supply real screenshots, recordings, logos or guidelines as local file paths. The studio tracks which scenes use authentic footage and which are illustrative.
+Replace those facts with your own product details. Supply real screenshots, recordings, logos and guidelines as local file paths. The studio records which scenes use authentic footage and which are illustrative.
 
-| Skill | What to ask for |
+### Your film, in three frames
+
+| Horizontal | Vertical | Square |
+| :---: | :---: | :---: |
+| **16:9** | **9:16** | **1:1** |
+| 1920 × 1080 | 1080 × 1920 | 1080 × 1080 |
+
+Timing and soundtrack are shared; each frame gets its own layout. Final exports are **30 fps H.264 MP4** with **AAC audio near −14 LUFS**. Drafts use half resolution.
+
+## The workflow
+
+1. **Concept.** One recommended idea, with the look, words and beats. You review it.
+2. **Storyboard.** Scene timings and real style frames, composed for each format. You review those too.
+3. **Production.** Music establishes the edit grid; animation and sound follow it.
+4. **Quality checks.** Layout, media, provenance and rendered files are checked. Automatic correction stops after three failing rounds.
+5. **Preview.** Play the film in a local browser, compare formats and leave notes on the frame that needs work.
+6. **Delivery.** Final videos, browser source, assets, audio, QC results and `PROVENANCE.md` land in `deliverables/`.
+
+The default is **guided** review at concept, storyboard and final preview. Ask for **final-only** to review just the preview, or **autonomous** to run through delivery. Skipped checkpoints are never recorded as approvals. A finished script or storyboard uses faithful direction; otherwise the studio proposes copy and pacing.
+
+<details>
+<summary><strong>Meet the five studio roles</strong></summary>
+
+| Role | Responsibility |
 | --- | --- |
-| `/motion-studio:setup` | Check Node, ffmpeg and a Chromium browser; report missing tools |
-| `/motion-studio:studio` | Make a video from a brief and assets, through preview and delivery |
-| `/motion-studio:brand` | Create or apply a client profile with logos, fonts, colors and motion rules |
-| `/motion-studio:revise` | Apply feedback from chat or timestamped preview notes |
+| Creative director | Concept and storyboard |
+| Motion engineer | Animation and composition in each format |
+| Editor | Pacing, cut points and reading time |
+| Sound designer | Generated music, effects and the mix |
+| QC reviewer | Automated reports and visual frame review |
 
-The creative director writes the concept; the motion engineer builds the pictures; the editor sets timing; the sound designer generates and mixes audio; the QC reviewer checks the result. When agent delegation is unavailable, the producer performs those roles in order.
+When delegation is unavailable, the producer performs these roles in order. The brief, concept and storyboard are saved in the production folder.
 
-By default, the skill asks for approval at concept, storyboard and final preview. Ask for `final-only` to review only the preview, or `autonomous` to run through delivery. Skipped checkpoints are not recorded as approvals. A supplied finished script uses faithful direction; otherwise the studio proposes copy and pacing.
+</details>
 
-The studio saves the brief, concept and storyboard in the production folder. It generates the soundtrack, builds the animation, renders drafts, checks them and starts a local browser preview for review. Keep supplied product claims factual; illustrative UI is a simplified picture of the features you described.
+### Notes belong on frames
 
-Default output is 30 fps H.264 MP4 with AAC audio near -14 LUFS, in horizontal (1920×1080), vertical (1080×1920) and square (1080×1080). Drafts use half resolution. Scenes share timing and a soundtrack; layouts are composed separately for each format.
+In the preview, **Space** plays or pauses, **← / →** steps frames and **N** focuses a timestamped note. Format and Live / Draft / Final controls switch the picture you review.
 
-The local preview has playback, frame stepping, format and source switches, timestamped notes, and approval controls. Space toggles playback; arrows step frames; N focuses the note field. `deliverables/` contains final videos, browser source, assets, audio, QC results and a provenance sheet.
-
-### Revise a video
-
-Leave timestamped notes in the preview, then return to the same Claude Code chat:
+When your notes are ready, return to the same chat:
 
 ```text
 /motion-studio:revise Notes are in. Apply the preview feedback to this project.
 ```
 
-You can also describe a change directly:
+Or describe a change directly:
 
 ```text
-/motion-studio:revise Hold the end-card logo half a second longer and make the CTA larger in the vertical version.
+/motion-studio:revise Hold the end-card logo half a second longer.
+Make the CTA larger in the vertical version.
 ```
 
-The revision skill reads the affected frames, makes the change, checks every format and resolves the notes it handled. Required final approval must be renewed after changes.
+The revision skill inspects the affected frames, checks every format and resolves the notes it handled. Finish picture and sound edits before final rendering: changes invalidate previous renders, QC and final approval. Delivery requires current final QC for every project format. Older renders need one fresh render and QC pass to establish their source revision.
 
-### Apply a brand
+### Bring your brand
 
 ```text
-/motion-studio:brand Create a profile for Acme using ./brand/logo.svg, ./brand/font.woff2 and ./brand/guidelines.pdf.
+/motion-studio:brand Create an Acme profile from ./brand/logo.svg,
+./brand/font.woff2 and ./brand/guidelines.pdf.
 ```
 
-Then ask `/motion-studio:studio` to use that profile. Each project uses one client's profile. Brand profiles and shared components stay on your machine, outside the installed plugin.
+Ask `/motion-studio:studio` to use that profile. A project uses one client’s brand. Profiles and shared components stay in `~/.motion-studio`, outside the plugin; set `MOTION_STUDIO_HOME` to use another store.
 
-Finish picture and sound edits before the final render. Delivery requires a passing final QC report for every project format. Changes to production source invalidate existing renders, QC and final approval; changing the approval checkpoints never creates an approval. Projects with older renders need a fresh render and QC pass to establish their source revision.
+## Reference
 
-## CLI
+| Skill | Use it for |
+| --- | --- |
+| `/motion-studio:setup` | Machine readiness and missing tools |
+| `/motion-studio:studio` | A production from brief to delivery |
+| `/motion-studio:brand` | Logos, fonts, colors and motion rules |
+| `/motion-studio:revise` | Chat feedback and timestamped notes |
 
-From the root of a cloned checkout, production commands can also be run directly. Keep the production directory outside the plugin checkout:
+<details>
+<summary><strong>CLI reference · all 20 commands</strong></summary>
+
+From a cloned checkout, keep production projects outside the plugin directory:
 
 ```sh
 node scripts/studio.mjs doctor
@@ -117,7 +165,7 @@ node scripts/studio.mjs init --dir ../my-ad --name "My ad" --duration 15
 node scripts/studio.mjs status --project ../my-ad
 ```
 
-Run the dispatcher without a command for usage. Commands return JSON on stdout and progress or failures on stderr. Project commands take `--project <directory>`.
+Run the dispatcher without a command for usage. Commands return JSON on stdout and progress or failures on stderr. Project commands accept `--project <directory>`.
 
 | Command | Purpose and main options |
 | --- | --- |
@@ -142,9 +190,43 @@ Run the dispatcher without a command for usage. Commands return JSON on stdout a
 | `timeline` | Export scene clips, stems, FCPXML and an After Effects build script: `--format horizontal` |
 | `deliver` | Assemble final videos and source in `deliverables/` |
 
-Brand profiles and shared components live in `~/.motion-studio`. Set `MOTION_STUDIO_HOME` to use a different store. Projects contain `project.json`, production notes, `composition/`, `assets/manifest.json`, `audio/cues.json`, `build/` and `renders/`.
+Projects contain `project.json`, production notes, `composition/`, `assets/manifest.json`, `audio/cues.json`, `build/` and `renders/`.
 
-## Update or uninstall
+</details>
+
+<details>
+<summary><strong>Install from source or develop a checkout</strong></summary>
+
+```sh
+git clone https://github.com/crankyjediii/motion-studio.git
+cd motion-studio
+claude --plugin-dir .
+```
+
+That loads the checkout for one session. For a persistent installation, run these terminal commands from the checkout instead:
+
+```sh
+claude plugin marketplace add .
+claude plugin install motion-studio@motion-studio
+```
+
+If skills do not appear, check `/plugin` to confirm Motion Studio is enabled, then restart Claude Code.
+
+Development checks, from the checkout root:
+
+```sh
+node --test tests/engine.test.mjs
+claude plugin validate .
+```
+
+Tests use temporary projects and a separate brand/component store. Browser/media checks require Chrome, ffmpeg and ffprobe; timeline checks also need `prores_ks`. Missing dependencies produce skipped checks. A local font is used only in a temporary macOS test; none is bundled. On another platform, set `MOTION_STUDIO_TEST_FONT` to an authorized local font to test font application.
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing the engine. The [composition contract](skills/studio/references/composition.md) explains authoring; [launch-15s](examples/launch-15s/) is a fictional reference composition and cue sheet.
+
+</details>
+
+<details>
+<summary><strong>Update or uninstall</strong></summary>
 
 Inside Claude Code:
 
@@ -153,37 +235,47 @@ Inside Claude Code:
 /plugin update motion-studio@motion-studio
 ```
 
-Restart Claude Code to load the update. To uninstall, run `/plugin uninstall motion-studio@motion-studio`. Production folders and the per-user brand/component store are separate from the plugin installation.
+Restart Claude Code to load the update. To uninstall, run `/plugin uninstall motion-studio@motion-studio`. Production folders and the per-user brand/component store are separate from the installation.
 
-## Troubleshooting and limits
+</details>
 
-- **A tool is missing:** run `/motion-studio:setup`. Restart the terminal after changing `PATH` or installing Node/ffmpeg.
-- **The browser is not found:** set `CHROME_PATH` to the installed browser executable before starting Claude Code.
-- **Chrome cannot launch in a sandbox:** allow the render command to run outside that process sandbox. Rendering needs to start a local headless browser.
-- **Delivery says a render or QC result is stale:** finish source and sound changes, render every project format again, then run final QC. Get final approval again when the project requires it.
-- **A production pauses for review:** the default is guided approval. Ask for `final-only` or `autonomous` if you want different checkpoints.
+## Support and status
 
-Open a [GitHub issue](https://github.com/crankyjediii/motion-studio/issues) with your OS, tool versions and the failing command when reporting a bug. Remove client assets and private data from reproductions.
+**Early release.** The engine’s integration tests, a sample production/revision and GitHub installation have been exercised on macOS. The four skills and five agents register. A full production driven through the installed Claude skills remains to be verified, as do Windows execution and native editor imports.
 
-### Authoring and verification status
+<details>
+<summary><strong>Something isn’t working?</strong></summary>
 
-A composition is an HTML page with seekable CSS or Web Animations. `Studio.scene` and `Studio.onFrame` support computed motion. Timers, CSS transitions and wall-clock animation do not produce repeatable frames. Read [the composition contract](skills/studio/references/composition.md) before building; [launch-15s](examples/launch-15s/) is a complete fictional example.
+| What you see | What to do |
+| --- | --- |
+| A required tool is missing | Run `/motion-studio:setup`; restart the terminal after changing `PATH`. |
+| The browser is not found | Set `CHROME_PATH` to its executable before starting Claude Code. |
+| Chrome cannot start in a sandbox | Allow the render command to launch a local headless browser outside that process sandbox. |
+| Delivery reports stale output | Finish edits, render every format again, run final QC, and renew approval when required. |
+| A production pauses for review | Guided approval is the default; ask for `final-only` or `autonomous` to change it. |
 
-Every asset needs provenance and licence information. Interface scenes declare whether they are authentic footage or illustrative. Illustrative interfaces carry a picture label by default and remain identified in preview and delivery records. Captures use a fresh browser profile and do not sign in. Fonts, stock footage and sampled music are not bundled; the included music and effects are synthesized locally. Online sourcing and dependency installation require the user's authorization.
+Open a [GitHub issue](https://github.com/crankyjediii/motion-studio/issues) with your OS, tool versions and failing command. Remove client assets and private data from reproductions.
 
-The studio is tuned for 15–60 seconds; the CLI accepts 5–120. CSS 3D supports cards, devices and layered scenes. Blender and Figma workflows are documented integrations, not built-in render engines. QC checks technical output and sampled layouts; visual review and listening are still part of the workflow. Automatic correction stops after three failing rounds.
+</details>
 
-Chrome needs permission to launch outside restrictive process sandboxes. macOS is the verified platform. Windows discovery and paths are implemented, but require a Windows execution pass. FCPXML and JSX export are provided for editing; actual imports in Final Cut, Resolve, Premiere and After Effects require verification in those applications. ProRes scene clips can be much larger than MP4s.
+<details>
+<summary><strong>What’s included, and what needs another tool?</strong></summary>
 
-This is an early release. The engine's integration tests and a sample production/revision have run on macOS. Registration of the four skills and five agents is verified; a full production driven through the installed Claude skills remains to be verified.
+- The studio is tuned for **15–60 seconds**; the CLI accepts **5–120**.
+- Frames are rendered locally from HTML/CSS in Chromium and encoded with ffmpeg. Motion must be seekable; timers and wall-clock animation do not produce repeatable frames.
+- Music and effects are synthesized locally. Fonts, stock footage and sampled music are not bundled. Online sourcing and dependency installation require authorization.
+- Interface scenes carry provenance. Illustrative screens are labeled by default and remain identified in preview and delivery records. Captures use a fresh browser profile and do not sign in.
+- CSS 3D covers cards, devices and layered scenes. Blender and Figma are documented integrations, not built-in render engines.
+- FCPXML and After Effects JSX exports support further editing. Actual imports in Final Cut, Resolve, Premiere and After Effects remain unverified. ProRes clips can be much larger than MP4s.
+- QC checks technical output and sampled layouts. Visual review and listening are still part of production.
 
-## Development checks
+</details>
 
-```sh
-node --test tests/engine.test.mjs
-claude plugin validate .
-```
+---
 
-The tests create temporary projects and a separate brand/component store. They exercise project and asset boundaries, capture, embedded video seeking, disclosure, preview controls and notes, partial renders, alternate resolution, timeline overlays, final QC and delivery freshness. Browser/media checks require the tools reported by `doctor`; the project checks still run without them. A local font is used only for a temporary test on macOS; none is bundled. On another platform, set `MOTION_STUDIO_TEST_FONT` to an authorized local font to test font application.
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing the engine. Plugin code is available under the [MIT license](LICENSE); project assets retain their own licence terms.
+<p align="center">
+  <a href="CONTRIBUTING.md">Contribute</a> &nbsp; · &nbsp;
+  <a href="https://github.com/crankyjediii/motion-studio/issues">Report an issue</a> &nbsp; · &nbsp;
+  <a href="LICENSE">MIT license</a><br>
+  <sub>Plugin code and the fictional demo are MIT licensed. Project assets retain their own licence terms.</sub>
+</p>
